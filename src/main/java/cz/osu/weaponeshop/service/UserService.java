@@ -1,4 +1,10 @@
 package cz.osu.weaponeshop.service;
 
-public class UserService {
+import cz.osu.weaponeshop.model.dto.UserDTO;
+
+public interface UserService {
+    boolean loginUser(UserDTO userDTO);
+    boolean register(UserDTO userDTO);
+    boolean updateUser(UserDTO userDTO);
+    boolean deleteUser(UserDTO userDTO);
 }

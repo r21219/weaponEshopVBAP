@@ -1,4 +1,4 @@
 package cz.osu.weaponeshop.service;
 
-public class WeaponService {
+public interface WeaponService {
 }
