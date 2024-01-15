@@ -8,10 +8,7 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 public class WeaponEshopApplication {
 //TODO
-// I recommend:
-// adding objectMapper
 // adding swagger docs
-//
     public static void main(String[] args) {
         SpringApplication.run(WeaponEshopApplication.class, args);
     }

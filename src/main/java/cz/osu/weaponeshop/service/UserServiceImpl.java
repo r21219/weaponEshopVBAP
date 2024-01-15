@@ -16,7 +16,7 @@ public class UserServiceImpl implements UserService{
     public boolean loginUser(UserDTO userDTO) {
         return userRepo.existsByUserNameAndPassword(userDTO.getUserName(),userDTO.getPassword());
     }
-
+    //TODO implement encryption tool for the user user argon (ensure it has salt)
     @Override
     public boolean register(UserDTO userDTO) {
         if (!userRepo.existsByUserName(userDTO.getUserName())){
@@ -30,6 +30,9 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public boolean updateUser(UserDTO userDTO) {
+        if (userRepo.existsByUserNameAndPassword(userDTO.getUserName(), userDTO.getPassword())){
+
+        }
         return false;
     }
 

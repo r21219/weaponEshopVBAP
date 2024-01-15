@@ -1,6 +1,5 @@
 package cz.osu.weaponeshop.model.dto;
 
-import cz.osu.weaponeshop.validator.ValidPassword;
 import cz.osu.weaponeshop.validator.ValidUsername;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,6 +13,5 @@ import lombok.Setter;
 public class UserDTO {
     @ValidUsername
     private String userName;
-    @ValidPassword
     private String password;
 }
