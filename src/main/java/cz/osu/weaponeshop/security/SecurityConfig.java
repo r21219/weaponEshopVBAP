@@ -1,3 +1,4 @@
+/*
 package cz.osu.weaponeshop.security;
 
 import org.springframework.context.annotation.Bean;
@@ -24,3 +25,4 @@ public class SecurityConfig {
         return http.build();
     }
 }
+*/
