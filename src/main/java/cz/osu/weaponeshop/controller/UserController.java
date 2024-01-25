@@ -1,9 +1,12 @@
 package cz.osu.weaponeshop.controller;
 
-import cz.osu.weaponeshop.model.dto.UserDTO;
+import cz.osu.weaponeshop.model.dto.LoginRequest;
+import cz.osu.weaponeshop.model.dto.RegisterRequest;
+import cz.osu.weaponeshop.model.response.AuthenticationResponse;
 import cz.osu.weaponeshop.service.UserServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -11,19 +14,19 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
     private final UserServiceImpl service;
-    @PostMapping("/login")
-    @Operation(summary = "Logs in the user into the system", description = "Logs in the user")
-    public void loginUser(@RequestBody UserDTO userCredentials){
-
-    }
-    @PostMapping("/register")
+    @PostMapping("/auth/register")
     @Operation(summary = "Registers users into the system", description = "Registers the user and adds them to the database")
-    public void registerUser(@RequestBody UserDTO registerCredentials){
-
+    public ResponseEntity<AuthenticationResponse> registerUser(@RequestBody RegisterRequest request){
+        return ResponseEntity.ok(service.register(request));
+    }
+    @PostMapping("/auth/login")
+    @Operation(summary = "Logs the user into the system", description = "Authenticates the user then logs them in")
+    public ResponseEntity<AuthenticationResponse> loginUser(@RequestBody LoginRequest request){
+        return ResponseEntity.ok(service.login(request));
     }
     @DeleteMapping
     @Operation(summary = "Deletes a user based on given id", description = "Deletes user from the database")
-    public void deleteUser(@RequestBody UserDTO deletedUser){
+    public void deleteUser(@RequestBody RegisterRequest deletedUser){
 
     }
     @PutMapping
