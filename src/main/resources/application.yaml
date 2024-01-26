@@ -13,7 +13,13 @@ spring:
         format_sql: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-
+app:
+  module-name: Weapons
+  api-version: 1
 server:
   servlet:
     context-path: /api/v1
+springdoc:
+  swagger-ui:
+    disable-swagger-default-url: true
+    path: /ui/

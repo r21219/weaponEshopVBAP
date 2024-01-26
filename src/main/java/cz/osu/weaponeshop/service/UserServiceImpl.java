@@ -7,19 +7,21 @@ import cz.osu.weaponeshop.model.dto.LoginRequest;
 import cz.osu.weaponeshop.model.dto.RegisterRequest;
 import cz.osu.weaponeshop.model.response.AuthenticationResponse;
 import cz.osu.weaponeshop.repository.UserRepository;
+import de.mkammerer.argon2.Argon2;
+import de.mkammerer.argon2.Argon2Factory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepo;
-    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final Argon2 argon2 = Argon2Factory.create();
     //TODO might be a good idea to delete modelMapper if I won't be using it
 
 
@@ -37,9 +39,12 @@ public class UserServiceImpl implements UserService {
     }
 
     public AuthenticationResponse register(RegisterRequest request) {
+        if (userRepo.findByUserName(request.getUserName()).isPresent()){
+            throw new BadCredentialsException("Username is already in use");
+        }
         var user = User.builder()
                 .userName(request.getUserName())
-                .password(passwordEncoder.encode(request.getPassword()))
+                .password(argon2.hash(2, 65536, 1, request.getPassword().toCharArray()))
                 .role(Role.USER)
                 .build();
         userRepo.save(user);
@@ -50,15 +55,18 @@ public class UserServiceImpl implements UserService {
     }
 
     public AuthenticationResponse login(LoginRequest request) {
+        var user = userRepo.findByUserName(request.getUserName())
+                .orElseThrow();
+        if (!argon2.verify(user.getPassword(), request.getPassword().toCharArray())) {
+            throw new BadCredentialsException("Invalid password");
+        }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUserName(),
                         request.getPassword()
                 )
         );
-        //FIXME Edit the exception so it makes sense
-        var user = userRepo.findByUserName(request.getUserName())
-                .orElseThrow();
+
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
