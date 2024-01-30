@@ -1,29 +1,41 @@
 package cz.osu.weaponeshop.controller;
-
+import cz.osu.weaponeshop.model.dto.TagDTO;
+import cz.osu.weaponeshop.service.TagServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/tag")
 public class TagController {
+    private final TagServiceImpl service;
     @PostMapping
-    @Operation(summary = "Creates a new tag", description = "Creates a tag and saves it into database")
-    public void createTag(){
-
+    @Operation(summary = "Creates a tag and adds it into the system", description = "Adds tag into the database")
+    public ResponseEntity<String> addTag(@RequestBody TagDTO newTag) {
+        service.addNewTag(newTag);
+        return new ResponseEntity<>("Tag successfully added", HttpStatus.OK);
     }
-    @GetMapping
-    @Operation(summary = "Fetches a tag based on id", description = "Gets a tag based id")
-    public void getTag(){
 
+    @GetMapping("/{tagId}")
+    @Operation(summary = "Gets a tag based on id", description = "Fetches a tag")
+    public TagDTO getTag(@PathVariable Long tagId) {
+        return service.getTagById(tagId);
     }
-    @PutMapping
-    @Operation(summary = "Updates a tag based on id", description = "Updates a tag based on tag")
-    public void updateTag(){
 
+    @PutMapping(("/{tagId}"))
+    @Operation(summary = "Updates the tag based on give id", description = "Updates a tag")
+    public ResponseEntity<String> updateTag(@RequestBody TagDTO newTag, @PathVariable Long tagId){
+        service.updateTag(newTag,tagId);
+        return new ResponseEntity<>("Tag successfully updated", HttpStatus.OK);
     }
-    @DeleteMapping
+
+    @DeleteMapping("/{tagId}")
     @Operation(summary = "Deletes a tag based on id", description = "Deletes a tag from the database")
-    public void deleteTag(){
-
+    public ResponseEntity<String> deleteTag(@PathVariable Long tagId){
+        service.removeTagById(tagId);
+        return new ResponseEntity<>("Tag successfully removed", HttpStatus.OK);
     }
 }

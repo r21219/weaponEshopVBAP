@@ -15,5 +15,5 @@ public class WeaponOrderLine {
     private Cart cart;
     @OneToOne
     private Weapon weapon;
-    private int unit;
+    private int count;
 }
