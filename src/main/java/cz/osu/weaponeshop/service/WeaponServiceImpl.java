@@ -16,41 +16,40 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class WeaponServiceImpl {
-    private final WeaponRepository repo;
+    private final WeaponRepository weaponRepo;
     private final TagRepository tagRepo;
 
     public void addNewWeapon(WeaponDTO newWeaponDTO) {
-        Weapon newWeapon = mapDTOToEntity(newWeaponDTO);
-        repo.save(newWeapon);
+        Weapon newWeapon = mapWeaponDTOToWeapon(newWeaponDTO);
+        weaponRepo.save(newWeapon);
     }
 
     public WeaponDTO getWeaponById(Long weaponId) {
-        Optional<Weapon> optionalWeapon = repo.findById(weaponId);
+        Optional<Weapon> optionalWeapon = weaponRepo.findById(weaponId);
 
-        return optionalWeapon.map(this::mapEntityToDTO)
+        return optionalWeapon.map(this::mapWeaponToWeaponDTO)
                 .orElseThrow(() -> new NotFoundException("Weapon not found with ID: " + weaponId));
     }
 
     public void updateWeapon(WeaponDTO updatedWeaponDTO, Long weaponId) {
-        Optional<Weapon> optionalExistingWeapon = repo.findById(weaponId);
+        Optional<Weapon> optionalExistingWeapon = weaponRepo.findById(weaponId);
 
         optionalExistingWeapon.ifPresentOrElse(existingWeapon -> {
-            updateEntityFromDTO(existingWeapon, updatedWeaponDTO);
-            repo.save(existingWeapon);
+            updateWeaponFromWeaponDTO(existingWeapon, updatedWeaponDTO);
+            weaponRepo.save(existingWeapon);
         }, () -> {
             throw new NotFoundException("Weapon not found with ID: " + weaponId);
         });
     }
-
     public void removeWeaponById(Long weaponId) {
-        Optional<Weapon> optionalWeapon = repo.findById(weaponId);
+        Optional<Weapon> optionalWeapon = weaponRepo.findById(weaponId);
 
-        optionalWeapon.ifPresentOrElse(repo::delete, () -> {
+        optionalWeapon.ifPresentOrElse(weaponRepo::delete, () -> {
                     throw new NotFoundException("Weapon not found with ID: " + weaponId);
                 });
     }
 
-    private Weapon mapDTOToEntity(WeaponDTO weaponDTO) {
+    private Weapon mapWeaponDTOToWeapon(WeaponDTO weaponDTO) {
         List<Tag> tags = fetchTagsFromDatabase(weaponDTO.getTagIds());
 
         return Weapon.builder()
@@ -61,7 +60,7 @@ public class WeaponServiceImpl {
                 .build();
     }
 
-    private WeaponDTO mapEntityToDTO(Weapon weapon) {
+    private WeaponDTO mapWeaponToWeaponDTO(Weapon weapon) {
         return WeaponDTO.builder()
                 .name(weapon.getName())
                 .description(weapon.getDescription())
@@ -70,7 +69,7 @@ public class WeaponServiceImpl {
                 .build();
     }
 
-    private void updateEntityFromDTO(Weapon existingWeapon, WeaponDTO updatedWeaponDTO) {
+    private void updateWeaponFromWeaponDTO(Weapon existingWeapon, WeaponDTO updatedWeaponDTO) {
         existingWeapon.setName(updatedWeaponDTO.getName());
         existingWeapon.setDescription(updatedWeaponDTO.getDescription());
 

@@ -5,11 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderRequest {
-    private List<ItemRequest> requestedItems;
+public class WeaponOrderLineDTO {
+    private String weaponName;
+    private int count;
 }

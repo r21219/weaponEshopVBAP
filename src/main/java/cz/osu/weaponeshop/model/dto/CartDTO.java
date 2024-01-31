@@ -6,10 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderRequest {
-    private List<ItemRequest> requestedItems;
+public class CartDTO {
+    private String userName;
+    private List<WeaponOrderLineDTO> weaponOrderLineDTO;
 }

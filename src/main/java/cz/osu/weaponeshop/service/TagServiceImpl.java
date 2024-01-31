@@ -20,13 +20,22 @@ public class TagServiceImpl {
     private final WeaponRepository weaponRepository;
 
     public void addNewTag(TagDTO newTagDTO) {
-        Tag newTag = mapDTOToEntity(newTagDTO);
+        Tag newTag = mapTagDTOToTag(newTagDTO);
         tagRepository.save(newTag);
+        updateWeaponsBasedOnTagDTO(newTag, newTagDTO);
+    }
+
+    private void updateWeaponsBasedOnTagDTO(Tag tag, TagDTO tagDTO) {
+/*        for (Long weaponId : tagDTO.getWeaponIds()){
+            Weapon weapon = weaponRepository.findById(weaponId).orElseThrow(() -> new NotFoundException("Weapon not found with ID: " + weaponId));
+            weapon.getTags().add(tag);
+            weaponRepository.save(weapon);
+        }*/
     }
 
     public TagDTO getTagById(Long tagId) {
         Optional<Tag> optionalTag = tagRepository.findById(tagId);
-        return optionalTag.map(this::mapEntityToDTO)
+        return optionalTag.map(this::mapTagToTagDTO)
                 .orElseThrow(() -> new NotFoundException("Tag not found with ID: " + tagId));
     }
 
@@ -34,8 +43,9 @@ public class TagServiceImpl {
         Optional<Tag> optionalExistingTag = tagRepository.findById(tagId);
 
         optionalExistingTag.ifPresentOrElse(existingTag -> {
-            updateEntityFromDTO(existingTag, updatedTagDTO);
+            updateTagFromTagDTO(existingTag, updatedTagDTO);
             tagRepository.save(existingTag);
+            updateWeaponsBasedOnTagDTO(existingTag, updatedTagDTO);
         }, () -> {
             throw new NotFoundException("Tag not found with ID: " + tagId);
         });
@@ -52,7 +62,7 @@ public class TagServiceImpl {
         });
     }
 
-    private Tag mapDTOToEntity(TagDTO tagDTO) {
+    private Tag mapTagDTOToTag(TagDTO tagDTO) {
         List<Weapon> weapons = fetchWeaponsFromDatabase(tagDTO.getWeaponIds());
 
         return Tag.builder()
@@ -61,14 +71,14 @@ public class TagServiceImpl {
                 .build();
     }
 
-    private TagDTO mapEntityToDTO(Tag tag) {
+    private TagDTO mapTagToTagDTO(Tag tag) {
         return TagDTO.builder()
                 .name(tag.getName())
                 .weaponIds(tag.getWeapons().stream().map(Weapon::getId).collect(Collectors.toList()))
                 .build();
     }
 
-    private void updateEntityFromDTO(Tag existingTag, TagDTO updatedTagDTO) {
+    private void updateTagFromTagDTO(Tag existingTag, TagDTO updatedTagDTO) {
         existingTag.setName(updatedTagDTO.getName());
 
         List<Weapon> weapons = fetchWeaponsFromDatabase(updatedTagDTO.getWeaponIds());

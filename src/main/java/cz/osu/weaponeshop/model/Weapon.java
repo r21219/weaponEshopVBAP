@@ -16,7 +16,7 @@ public class Weapon {
     private Long id;
     private String name;
     private String description;
-    @ManyToMany
+    @ManyToMany(mappedBy = "weapons")
     private List<Tag> tags;
     private int price;
 }

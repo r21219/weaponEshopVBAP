@@ -21,8 +21,8 @@ public class User implements UserDetails {
     private Long id;
     private String userName;
     private String password;
-    @OneToOne
-    private Cart cart;
+    @OneToMany
+    private List<Cart> carts;
     @Enumerated(EnumType.STRING)
     private Role role;
 
