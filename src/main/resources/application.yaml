@@ -6,7 +6,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -14,6 +14,7 @@ spring:
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 app:
+  jwt-key: a3f1b3bac3284de9a823c303db3a2e45f1a3d2c4b5e6f7a8b9c0d1e2f3a4b5c6d
   module-name: Weapons
   api-version: 1
 server:

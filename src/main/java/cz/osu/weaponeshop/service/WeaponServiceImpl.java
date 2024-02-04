@@ -1,5 +1,6 @@
 package cz.osu.weaponeshop.service;
 
+import cz.osu.weaponeshop.exception.BadRequestException;
 import cz.osu.weaponeshop.exception.NotFoundException;
 import cz.osu.weaponeshop.model.Tag;
 import cz.osu.weaponeshop.model.Weapon;
@@ -18,34 +19,52 @@ import java.util.stream.Collectors;
 public class WeaponServiceImpl {
     private final WeaponRepository weaponRepo;
     private final TagRepository tagRepo;
+    private final String WEAPON_NOT_FOUND = "Weapon not found with ID: ";
+    private final String WEAPON_ID_NULL = "Weapon id cannot be empty";
+    private final String WEAPON_INVALID = "Invalid weapon name and description hast to be filled in, while the price has to be bigger than 0";
 
     public void addNewWeapon(WeaponDTO newWeaponDTO) {
+        if (newWeaponDTO.isInValid()){
+            throw new BadRequestException(WEAPON_INVALID);
+        }
         Weapon newWeapon = mapWeaponDTOToWeapon(newWeaponDTO);
         weaponRepo.save(newWeapon);
     }
 
     public WeaponDTO getWeaponById(Long weaponId) {
+        if (weaponId == null){
+            throw new BadRequestException(WEAPON_ID_NULL);
+        }
         Optional<Weapon> optionalWeapon = weaponRepo.findById(weaponId);
 
         return optionalWeapon.map(this::mapWeaponToWeaponDTO)
-                .orElseThrow(() -> new NotFoundException("Weapon not found with ID: " + weaponId));
+                .orElseThrow(() -> new NotFoundException(WEAPON_NOT_FOUND + weaponId));
     }
 
     public void updateWeapon(WeaponDTO updatedWeaponDTO, Long weaponId) {
+        if (weaponId == null){
+            throw new BadRequestException(WEAPON_ID_NULL);
+        }
+        if (updatedWeaponDTO.isInValid()){
+            throw new BadRequestException(WEAPON_INVALID);
+        }
         Optional<Weapon> optionalExistingWeapon = weaponRepo.findById(weaponId);
 
         optionalExistingWeapon.ifPresentOrElse(existingWeapon -> {
             updateWeaponFromWeaponDTO(existingWeapon, updatedWeaponDTO);
             weaponRepo.save(existingWeapon);
         }, () -> {
-            throw new NotFoundException("Weapon not found with ID: " + weaponId);
+            throw new NotFoundException(WEAPON_NOT_FOUND + weaponId);
         });
     }
     public void removeWeaponById(Long weaponId) {
+        if (weaponId == null){
+            throw new BadRequestException(WEAPON_ID_NULL);
+        }
         Optional<Weapon> optionalWeapon = weaponRepo.findById(weaponId);
 
         optionalWeapon.ifPresentOrElse(weaponRepo::delete, () -> {
-                    throw new NotFoundException("Weapon not found with ID: " + weaponId);
+                    throw new NotFoundException(WEAPON_NOT_FOUND + weaponId);
                 });
     }
 

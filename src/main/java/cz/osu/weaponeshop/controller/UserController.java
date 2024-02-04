@@ -1,8 +1,8 @@
 package cz.osu.weaponeshop.controller;
 
-import cz.osu.weaponeshop.model.dto.LoginRequest;
-import cz.osu.weaponeshop.model.dto.RegisterRequest;
-import cz.osu.weaponeshop.model.dto.UpdateRequest;
+import cz.osu.weaponeshop.model.dto.user.LoginRequest;
+import cz.osu.weaponeshop.model.dto.user.RegisterRequest;
+import cz.osu.weaponeshop.model.dto.user.UpdateRequest;
 import cz.osu.weaponeshop.model.response.AuthenticationResponse;
 import cz.osu.weaponeshop.service.UserServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,5 +37,10 @@ public class UserController {
     public ResponseEntity<String> updateUser(@RequestBody UpdateRequest updateRequest){
         service.updateUser(updateRequest);
         return new ResponseEntity<>("User was successfully updated", HttpStatus.OK);
+    }
+    @GetMapping("/{userId}")
+    @Operation()
+    public ResponseEntity<String> getUser(@PathVariable Long userId){
+        return new ResponseEntity<>(service.getUser(userId), HttpStatus.OK);
     }
 }

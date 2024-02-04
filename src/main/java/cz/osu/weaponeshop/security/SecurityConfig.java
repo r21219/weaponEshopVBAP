@@ -1,6 +1,7 @@
 package cz.osu.weaponeshop.security;
 
 import cz.osu.weaponeshop.config.JwtAuthenticationFilter;
+import cz.osu.weaponeshop.exception.UnauthorizedAccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +34,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .csrf(AbstractHttpConfigurer::disable);
+                .csrf(AbstractHttpConfigurer::disable)
+                .exceptionHandling(exception -> exception.authenticationEntryPoint
+                (new UnauthorizedAccessHandler()));
         return http.build();
     }
 }

@@ -16,5 +16,10 @@ public class Tag {
     private Long id;
     private String name;
     @ManyToMany
+    @JoinTable(
+            name = "weapon_tag",
+            joinColumns = @JoinColumn(name = "tag_id"),
+            inverseJoinColumns = @JoinColumn(name = "weapon_id")
+    )
     private List<Weapon> weapons;
 }

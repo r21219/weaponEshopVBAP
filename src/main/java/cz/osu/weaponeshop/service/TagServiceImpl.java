@@ -1,5 +1,6 @@
 package cz.osu.weaponeshop.service;
 
+import cz.osu.weaponeshop.exception.BadRequestException;
 import cz.osu.weaponeshop.exception.NotFoundException;
 import cz.osu.weaponeshop.model.Tag;
 import cz.osu.weaponeshop.model.Weapon;
@@ -18,47 +19,54 @@ import java.util.stream.Collectors;
 public class TagServiceImpl {
     private final TagRepository tagRepository;
     private final WeaponRepository weaponRepository;
-
+    private final String TAG_NOT_FOUND = "Tag not found with ID: ";
+    private final String TAG_ID_NULL = "Tag id cannot be empty";
+    private final String TAG_INVALID = "Tag name cannot be empty";
     public void addNewTag(TagDTO newTagDTO) {
+        if (newTagDTO.isEmpty()){
+            throw new BadRequestException(TAG_INVALID);
+        }
         Tag newTag = mapTagDTOToTag(newTagDTO);
         tagRepository.save(newTag);
-        updateWeaponsBasedOnTagDTO(newTag, newTagDTO);
-    }
-
-    private void updateWeaponsBasedOnTagDTO(Tag tag, TagDTO tagDTO) {
-/*        for (Long weaponId : tagDTO.getWeaponIds()){
-            Weapon weapon = weaponRepository.findById(weaponId).orElseThrow(() -> new NotFoundException("Weapon not found with ID: " + weaponId));
-            weapon.getTags().add(tag);
-            weaponRepository.save(weapon);
-        }*/
     }
 
     public TagDTO getTagById(Long tagId) {
+        if (tagId == null){
+            throw new BadRequestException(TAG_ID_NULL);
+        }
         Optional<Tag> optionalTag = tagRepository.findById(tagId);
         return optionalTag.map(this::mapTagToTagDTO)
-                .orElseThrow(() -> new NotFoundException("Tag not found with ID: " + tagId));
+                .orElseThrow(() -> new NotFoundException(TAG_NOT_FOUND + tagId));
     }
 
     public void updateTag(TagDTO updatedTagDTO, Long tagId) {
+        if (updatedTagDTO.isEmpty()){
+            throw new BadRequestException(TAG_INVALID);
+        }
+        if (tagId == null){
+            throw new BadRequestException(TAG_ID_NULL);
+        }
         Optional<Tag> optionalExistingTag = tagRepository.findById(tagId);
 
         optionalExistingTag.ifPresentOrElse(existingTag -> {
             updateTagFromTagDTO(existingTag, updatedTagDTO);
             tagRepository.save(existingTag);
-            updateWeaponsBasedOnTagDTO(existingTag, updatedTagDTO);
         }, () -> {
-            throw new NotFoundException("Tag not found with ID: " + tagId);
+            throw new NotFoundException(TAG_NOT_FOUND + tagId);
         });
     }
 
     public void removeTagById(Long tagId) {
+        if (tagId == null){
+            throw new BadRequestException(TAG_ID_NULL);
+        }
         Optional<Tag> optionalTag = tagRepository.findById(tagId);
 
         optionalTag.ifPresentOrElse(tagToRemove -> {
             disassociateTagFromWeapons(tagToRemove);
             tagRepository.delete(tagToRemove);
         }, () -> {
-            throw new NotFoundException("Tag not found with ID: " + tagId);
+            throw new NotFoundException(TAG_NOT_FOUND + tagId);
         });
     }
 

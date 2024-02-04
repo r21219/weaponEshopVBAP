@@ -1,8 +1,8 @@
 package cz.osu.weaponeshop.controller;
 
-import cz.osu.weaponeshop.model.dto.CartDTO;
-import cz.osu.weaponeshop.model.dto.CreateOrderRequest;
-import cz.osu.weaponeshop.model.dto.OrderRequest;
+import cz.osu.weaponeshop.model.dto.cart.CartDTO;
+import cz.osu.weaponeshop.model.dto.cart.CreateCartRequest;
+import cz.osu.weaponeshop.model.dto.cart.UpdateCartRequest;
 import cz.osu.weaponeshop.service.CartServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +18,8 @@ public class CartController {
 
     @PostMapping
     @Operation(summary = "Creates a cart", description = "Creates a cart")
-    public ResponseEntity<String> createCart(@RequestBody CreateOrderRequest createOrderRequest) {
-        service.createCart(createOrderRequest);
+    public ResponseEntity<String> createCart(@RequestBody CreateCartRequest createCartRequest) {
+        service.createCart(createCartRequest);
         return new ResponseEntity<>("Successfully create cart", HttpStatus.OK);
     }
 
@@ -31,8 +31,8 @@ public class CartController {
 
     @PutMapping("/{cartId}")
     @Operation(summary = "Updates a cart", description = "Updates a cart")
-    public ResponseEntity<String> putCart(Long cartId, @RequestBody OrderRequest orderRequest) {
-        service.updateCart(cartId, orderRequest);
+    public ResponseEntity<String> putCart(Long cartId, @RequestBody UpdateCartRequest updateCartRequest) {
+        service.updateCart(cartId, updateCartRequest);
         return new ResponseEntity<>("Successfully update the cart", HttpStatus.OK);
     }
 

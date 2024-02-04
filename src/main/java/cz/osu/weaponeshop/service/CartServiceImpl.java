@@ -1,13 +1,17 @@
 package cz.osu.weaponeshop.service;
 
+import cz.osu.weaponeshop.exception.BadRequestException;
 import cz.osu.weaponeshop.exception.NotFoundException;
 import cz.osu.weaponeshop.model.Cart;
 import cz.osu.weaponeshop.model.Weapon;
 import cz.osu.weaponeshop.model.WeaponOrderLine;
-import cz.osu.weaponeshop.model.dto.*;
+import cz.osu.weaponeshop.model.dto.ItemRequest;
+import cz.osu.weaponeshop.model.dto.WeaponOrderLineDTO;
+import cz.osu.weaponeshop.model.dto.cart.CartDTO;
+import cz.osu.weaponeshop.model.dto.cart.CreateCartRequest;
+import cz.osu.weaponeshop.model.dto.cart.UpdateCartRequest;
 import cz.osu.weaponeshop.repository.CartRepository;
 import cz.osu.weaponeshop.repository.UserRepository;
-import cz.osu.weaponeshop.repository.WeaponOrderLineRepository;
 import cz.osu.weaponeshop.repository.WeaponRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,17 +26,25 @@ public class CartServiceImpl {
     private final CartRepository cartRepo;
     private final WeaponRepository weaponRepo;
     private final UserRepository userRepo;
-    private final WeaponOrderLineRepository weaponOrderLineRepos;
+    private final String CART_NOT_FOUND = "Cart not found with ID: ";
+    private final String CART_ID_NULL = "Cart id cannot be empty";
+    private final String ITEM_INVALID = "Item cannot have empty id or count less or equal than 0";
 
-    public void createCart(CreateOrderRequest createOrderRequest) {
-        Cart newCart = mapCreateOrderRequestToCart(createOrderRequest);
-        newCart.setUser(userRepo.findByUserName(createOrderRequest.getUserName()).orElseThrow(() ->
-                new NotFoundException("User by that name does not exist:" + createOrderRequest.getUserName())));
+    public void createCart(CreateCartRequest createCartRequest) {
+        if (createCartRequest.isEmpty()) {
+            throw new BadRequestException("Cart name cannot be empty");
+        }
+        Cart newCart = mapCreateCartRequestToCart(createCartRequest);
+        newCart.setUser(userRepo.findByUserName(createCartRequest.getUserName()).orElseThrow(() ->
+                new NotFoundException("User by that name does not exist:" + createCartRequest.getUserName())));
         cartRepo.save(newCart);
     }
 
     public CartDTO getCartDTO(Long cartId) {
-        Cart cart = cartRepo.findById(cartId).orElseThrow(() -> new NotFoundException("Cart was not found with ID: " + cartId));
+        if (cartId == null) {
+            throw new BadRequestException(CART_ID_NULL);
+        }
+        Cart cart = cartRepo.findById(cartId).orElseThrow(() -> new NotFoundException(CART_NOT_FOUND + cartId));
         return mapCartToCartDTO(cart);
 
 
@@ -55,50 +67,62 @@ public class CartServiceImpl {
     }
 
     private Cart getCart(Long cartId) {
-        return cartRepo.findById(cartId).orElseThrow(() -> new NotFoundException("Cart was not found with ID: " + cartId));
+        if (cartId == null) {
+            throw new BadRequestException(CART_ID_NULL);
+        }
+        return cartRepo.findById(cartId).orElseThrow(() -> new NotFoundException(CART_NOT_FOUND + cartId));
     }
+
     @Transactional
-    public void updateCart(Long cartId, OrderRequest orderRequest) {
-        Cart cart = cartRepo.findById(cartId).orElseThrow(() -> new NotFoundException("Cart not found with ID: " + cartId));
+    public void updateCart(Long cartId, UpdateCartRequest updateCartRequest) {
+        if (cartId == null) {
+            throw new BadRequestException(CART_ID_NULL);
+        }
+        Cart cart = cartRepo.findById(cartId).orElseThrow(() -> new NotFoundException(CART_NOT_FOUND + cartId));
         cart.getOrderedWeapons().clear();
         cartRepo.save(cart);
-        Cart diffCart = mapOrderRequestToCart(cartId, orderRequest);
+        Cart diffCart = mapUpdateCartRequestToCart(updateCartRequest);
         cart.getOrderedWeapons().addAll(diffCart.getOrderedWeapons());
         cartRepo.save(cart);
     }
 
     public void deleteCart(Long cartId) {
+        if (cartId == null) {
+            throw new BadRequestException(CART_ID_NULL);
+        }
         cartRepo.delete(getCart(cartId));
     }
 
-    private Cart mapOrderRequestToCart(Long cartId, OrderRequest orderRequest) {
+    private Cart mapUpdateCartRequestToCart(UpdateCartRequest updateCartRequest) {
         List<WeaponOrderLine> weaponOrderLines = new ArrayList<>();
-        for (ItemRequest itemRequest : orderRequest.getRequestedItems()) {
-            weaponOrderLines.add(mapItemRequestToWeapon(cartId, itemRequest));
+        for (ItemRequest itemRequest : updateCartRequest.getRequestedItems()) {
+            if (itemRequest.isInValid()) {
+                throw new BadRequestException(ITEM_INVALID);
+            }
+            weaponOrderLines.add(mapItemRequestToWeapon(itemRequest));
         }
         return Cart.builder()
                 .orderedWeapons(weaponOrderLines)
                 .build();
     }
 
-    private Cart mapCreateOrderRequestToCart(CreateOrderRequest orderRequest) {
+    private Cart mapCreateCartRequestToCart(CreateCartRequest orderRequest) {
         List<WeaponOrderLine> weaponOrderLines = new ArrayList<>();
         for (ItemRequest itemRequest : orderRequest.getRequestedItems()) {
-            weaponOrderLines.add(mapItemRequestToWeapon(null, itemRequest));
+            if (itemRequest.isInValid()) {
+                throw new BadRequestException(ITEM_INVALID);
+            }
+            weaponOrderLines.add(mapItemRequestToWeapon(itemRequest));
         }
         return Cart.builder()
                 .orderedWeapons(weaponOrderLines)
                 .build();
     }
 
-    private WeaponOrderLine mapItemRequestToWeapon(Long cartId, ItemRequest itemRequest) {
-        Cart cart = null;
+    private WeaponOrderLine mapItemRequestToWeapon(ItemRequest itemRequest) {
         Weapon weapon = weaponRepo.findById(itemRequest.getWeaponId()).orElseThrow(() ->
                 new NotFoundException("Requested weapon was not found with Id"
                         + itemRequest.getWeaponId()));
-        if (cartId != null) {
-            cart = getCart(cartId);
-        }
         return WeaponOrderLine.builder()
                 .weapon(weapon)
                 .count(itemRequest.getCount())
