@@ -27,19 +27,19 @@ public class UserController {
         return ResponseEntity.ok(service.login(request));
     }
     @DeleteMapping
-    @Operation(summary = "Deletes a user based on given id", description = "Deletes user from the database")
+    @Operation(summary = "Deletes a user based on given request", description = "Deletes user from the database")
     public ResponseEntity<String> deleteUser(@RequestBody RegisterRequest deletedUser){
         service.deleteUser(deletedUser);
         return new ResponseEntity<>("User was successfully deleted", HttpStatus.OK);
     }
     @PutMapping
-    @Operation(summary = "Updates a user based on given id", description = "Updates user")
+    @Operation(summary = "Updates a user based on given request", description = "Updates user")
     public ResponseEntity<String> updateUser(@RequestBody UpdateRequest updateRequest){
         service.updateUser(updateRequest);
         return new ResponseEntity<>("User was successfully updated", HttpStatus.OK);
     }
     @GetMapping("/{userId}")
-    @Operation()
+    @Operation(summary = "Gets a users username based on id", description = "Fetches userName from database")
     public ResponseEntity<String> getUser(@PathVariable Long userId){
         return new ResponseEntity<>(service.getUser(userId), HttpStatus.OK);
     }
