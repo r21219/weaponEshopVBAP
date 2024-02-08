@@ -4,12 +4,14 @@ import cz.osu.weaponeshop.exception.BadRequestException;
 import cz.osu.weaponeshop.exception.NotFoundException;
 import cz.osu.weaponeshop.model.Tag;
 import cz.osu.weaponeshop.model.Weapon;
-import cz.osu.weaponeshop.model.dto.WeaponDTO;
+import cz.osu.weaponeshop.model.dto.weapon.WeaponDTO;
+import cz.osu.weaponeshop.model.dto.weapon.WeaponDisplay;
 import cz.osu.weaponeshop.repository.TagRepository;
 import cz.osu.weaponeshop.repository.WeaponRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,7 +32,14 @@ public class WeaponServiceImpl {
         Weapon newWeapon = mapWeaponDTOToWeapon(newWeaponDTO);
         weaponRepo.save(newWeapon);
     }
-
+    public List<WeaponDisplay>getAllWeapons(){
+        List<Weapon> weapons = weaponRepo.findAll();
+        List<WeaponDisplay> parsedWeapons = new ArrayList<>();
+        for (Weapon weapon : weapons){
+            parsedWeapons.add(mapWeaponToWeaponDisplay(weapon));
+        }
+        return parsedWeapons;
+    }
     public WeaponDTO getWeaponById(Long weaponId) {
         if (weaponId == null){
             throw new BadRequestException(WEAPON_ID_NULL);
@@ -87,7 +96,15 @@ public class WeaponServiceImpl {
                 .price(weapon.getPrice())
                 .build();
     }
-
+    private WeaponDisplay mapWeaponToWeaponDisplay(Weapon weapon) {
+        return WeaponDisplay.builder()
+                .id(weapon.getId())
+                .name(weapon.getName())
+                .description(weapon.getDescription())
+                .tags(weapon.getTags().stream().map(Tag::getName).collect(Collectors.toList()))
+                .price(weapon.getPrice())
+                .build();
+    }
     private void updateWeaponFromWeaponDTO(Weapon existingWeapon, WeaponDTO updatedWeaponDTO) {
         existingWeapon.setName(updatedWeaponDTO.getName());
         existingWeapon.setDescription(updatedWeaponDTO.getDescription());

@@ -9,6 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 public class ItemRequest {
     private Long weaponId;
+    private int price;
     private int count;
     @JsonIgnore
     public boolean isInValid(){

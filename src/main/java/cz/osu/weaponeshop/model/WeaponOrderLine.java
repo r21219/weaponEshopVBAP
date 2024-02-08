@@ -15,5 +15,6 @@ public class WeaponOrderLine {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "weapon_id")
     private Weapon weapon;
+    private int totalPrice;
     private int count;
 }

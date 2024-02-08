@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 @RequiredArgsConstructor
 @RequestMapping("/cart")
 public class CartController {
@@ -22,7 +23,16 @@ public class CartController {
         service.createCart(createCartRequest);
         return new ResponseEntity<>("Successfully create cart", HttpStatus.OK);
     }
-
+    @GetMapping("current/{username}")
+    @Operation(summary = "Get a cart ", description = "Gets the specific cart")
+    public ResponseEntity<CartDTO> getCurrentCart(@PathVariable String username) {
+        return ResponseEntity.ok(service.getCurrentCart(username));
+    }
+    @PostMapping("/{username}")
+    @Operation(summary = "Get a cart ", description = "Gets the specific cart")
+    public ResponseEntity<CartDTO> updateAndGetCart(@PathVariable String username, @RequestBody UpdateCartRequest updateCartRequest) {
+        return ResponseEntity.ok(service.getCartDTO(username,updateCartRequest));
+    }
     @GetMapping("/{cartId}")
     @Operation(summary = "Get a cart ", description = "Gets the specific cart")
     public ResponseEntity<CartDTO> getCart(@PathVariable Long cartId) {

@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class WeaponOrderLineDTO {
     private String weaponName;
+    private int totalPrice;
     private int count;
 }

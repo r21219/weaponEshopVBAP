@@ -1,6 +1,7 @@
 package cz.osu.weaponeshop.controller;
 
-import cz.osu.weaponeshop.model.dto.WeaponDTO;
+import cz.osu.weaponeshop.model.dto.weapon.WeaponDTO;
+import cz.osu.weaponeshop.model.dto.weapon.WeaponDisplay;
 import cz.osu.weaponeshop.service.WeaponServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 @RequiredArgsConstructor
 @RequestMapping("/weapon")
 public class WeaponController {
@@ -25,7 +29,11 @@ public class WeaponController {
     public ResponseEntity<WeaponDTO> getWeapon(@PathVariable Long weaponId) {
         return ResponseEntity.ok(service.getWeaponById(weaponId));
     }
-
+    @GetMapping()
+    @Operation(summary = "Gets all weapons in the database", description = "Fetches a weapon")
+    public ResponseEntity<List<WeaponDisplay>> getAllWeapons() {
+        return ResponseEntity.ok(service.getAllWeapons());
+    }
     @PutMapping(("/{weaponId}"))
     @Operation(summary = "Updates the weapon based on give id", description = "Updates a weapon")
     public ResponseEntity<String> updateWeapon(@RequestBody WeaponDTO newWeapon, @PathVariable Long weaponId){

@@ -1,4 +1,4 @@
-package cz.osu.weaponeshop.model.dto;
+package cz.osu.weaponeshop.model.dto.weapon;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.micrometer.common.util.StringUtils;

@@ -16,6 +16,8 @@ public class Cart {
     private Long id;
     @ManyToOne
     private User user;
+    @Enumerated(EnumType.STRING)
+    private CartStatus cartStatus;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "cart_id", referencedColumnName = "id", nullable = false)
     private List<WeaponOrderLine> orderedWeapons;

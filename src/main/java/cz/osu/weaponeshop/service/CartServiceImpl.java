@@ -3,6 +3,7 @@ package cz.osu.weaponeshop.service;
 import cz.osu.weaponeshop.exception.BadRequestException;
 import cz.osu.weaponeshop.exception.NotFoundException;
 import cz.osu.weaponeshop.model.Cart;
+import cz.osu.weaponeshop.model.CartStatus;
 import cz.osu.weaponeshop.model.Weapon;
 import cz.osu.weaponeshop.model.WeaponOrderLine;
 import cz.osu.weaponeshop.model.dto.ItemRequest;
@@ -49,18 +50,45 @@ public class CartServiceImpl {
 
 
     }
-
+    public CartDTO getCurrentCart(String userName){
+        Cart cart = cartRepo.findByUser_UserNameAndCartStatus(userName,CartStatus.UNFINISHED);
+        if (cart == null){
+            throw new NotFoundException("Card was not found");
+        }
+        return mapCartToCartDTO(cart);
+    }
+    public CartDTO getCartDTO(String username,UpdateCartRequest updateCartRequest) {
+        if (username == null) {
+            throw new BadRequestException(CART_ID_NULL);
+        }
+        Cart cart = cartRepo.findByUser_UserNameAndCartStatus(username,CartStatus.UNFINISHED);
+        if (cart == null){
+            cart = Cart.builder()
+                    .user(userRepo.findByUserName(username).orElseThrow(()-> new NotFoundException("User was not found")))
+                    .cartStatus(CartStatus.UNFINISHED)
+                    .orderedWeapons(new ArrayList<>())
+                    .build();
+        }else {
+            cart.getOrderedWeapons().clear();
+        }
+        Cart diffCart = mapUpdateCartRequestToCart(updateCartRequest);
+        cart.getOrderedWeapons().addAll(diffCart.getOrderedWeapons());
+        cart = cartRepo.save(cart);
+        return mapCartToCartDTO(cart);
+    }
     private CartDTO mapCartToCartDTO(Cart cart) {
         List<WeaponOrderLineDTO> weaponOrderLineDTOS = new ArrayList<>();
         for (WeaponOrderLine weaponOrderLine : cart.getOrderedWeapons()) {
             weaponOrderLineDTOS.add(
                     WeaponOrderLineDTO.builder()
                             .weaponName(weaponOrderLine.getWeapon().getName())
+                            .totalPrice(weaponOrderLine.getTotalPrice())
                             .count(weaponOrderLine.getCount())
                             .build()
             );
         }
         return CartDTO.builder()
+                .id(cart.getId())
                 .userName(cart.getUser().getUsername())
                 .weaponOrderLineDTO(weaponOrderLineDTOS)
                 .build();
@@ -125,6 +153,7 @@ public class CartServiceImpl {
                         + itemRequest.getWeaponId()));
         return WeaponOrderLine.builder()
                 .weapon(weapon)
+                .totalPrice(weapon.getPrice() * itemRequest.getCount())
                 .count(itemRequest.getCount())
                 .build();
     }
